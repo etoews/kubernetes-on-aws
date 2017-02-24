@@ -1,7 +1,7 @@
 ---
 - name: common tasks
   hosts: tag_class_kubernetes
-  gather_facts: False
+  gather_facts: no
   become: yes
   roles:
     - common
