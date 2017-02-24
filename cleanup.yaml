@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: delete key pair
+      ec2_key:
+        region: "{{ region }}"
+        name: "{{ resource_name }}"
+        state: absent
+    - name: delete local key pair file
+      file:
+        path: "~/.ssh/{{ resource_name }}.pem"
+        state: absent
+    - name: delete security group
+      ec2_group:
+        region: "{{ region }}"
+        name: "{{ resource_name }}"
+        description: "Security Group for Kubernetes"
+        state: absent
+  #   - name: terminate instances
+  #     ec2:
+  #       region: "{{ region }}"
+  #       wait: yes
+  #       # List all of your running instance IDs here
+  #       instance_ids:
+  #       state: absent

@@ -1,0 +1,16 @@
+---
+- name: common tasks
+  hosts: tag_class_kubernetes
+  gather_facts: False
+  become: yes
+  roles:
+    - common
+- name: install kubeadm
+  hosts: tag_class_kubernetes
+  become: yes
+  roles:
+    - kubeadm
+- name: init controller
+  hosts: tag_role_controller
+  roles:
+    - controller

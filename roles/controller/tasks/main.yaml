@@ -1,0 +1,12 @@
+---
+- name: check for the kubeadm token file
+  local_action: stat path="{{ kubeadm_token_file }}"
+  register: stat_kubeadm_token_file
+- name: generate kubeadm token
+  command: kubeadm token generate
+  register: kubeadm_token
+  when: stat_kubeadm_token_file.stat.exists == false
+# crazy quoting for colons https://github.com/ansible/ansible/issues/2769
+- name: write token to local file
+  local_action: copy content="kubeadm_token{{':'}} {{ kubeadm_token.stdout }}" dest="{{ kubeadm_token_file }}"
+  when: stat_kubeadm_token_file.stat.exists == false

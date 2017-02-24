@@ -1,0 +1,17 @@
+---
+# install aptitude because it's a requirement for the apt module
+# https://github.com/ansible/ansible/issues/18987
+- name: install aptitude
+  apt:
+    name: aptitude
+    state: present
+- name: apt update and upgrade
+  apt:
+    update_cache: yes
+    upgrade: yes
+# install python 2 because it's a requirement for ansible
+# http://stackoverflow.com/questions/32429259/ansible-fails-with-bin-sh-1-usr-bin-python-not-found
+- name: install python 2
+  apt:
+    name: python-simplejson
+    state: present

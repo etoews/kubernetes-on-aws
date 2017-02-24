@@ -1,0 +1,63 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    instance_type: t2.medium
+    # Ubuntu Server 16.04 LTS (HVM),EBS General Purpose (SSD) Volume Type
+    image: ami-3d299b59
+  tasks:
+    - name: create key pair
+      ec2_key:
+        region: "{{ region }}"
+        name: "{{ resource_name }}"
+      register: key_pair
+    - name: write local key pair file
+      copy:
+        content: "{{ key_pair.key.private_key }}"
+        dest: "~/.ssh/{{ resource_name }}.pem"
+        mode: 0600
+      when: key_pair.changed
+    - name: create security group
+      ec2_group:
+        region: "{{ region }}"
+        name: "{{ resource_name }}"
+        description: Security Group for Kubernetes
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+    - name: create controller instance
+      ec2:
+        region: "{{ region }}"
+        key_name: "{{ resource_name }}"
+        instance_type: "{{ instance_type }}"
+        image: "{{ image }}"
+        wait: yes
+        group: "{{ resource_name }}"
+        exact_count: 1
+        instance_tags:
+          Name: "{{ resource_name }}_controller"
+          class: kubernetes
+          role: controller
+        count_tag:
+          role: controller
+    - name: create worker instances
+      ec2:
+        region: "{{ region }}"
+        key_name: "{{ resource_name }}"
+        instance_type: "{{ instance_type }}"
+        image: "{{ image }}"
+        wait: yes
+        group: "{{ resource_name }}"
+        exact_count: 2
+        instance_tags:
+          Name: "{{ resource_name }}_worker"
+          class: kubernetes
+          role: worker
+        count_tag:
+          role: worker
