@@ -18,6 +18,10 @@
         name: "{{ resource_name }}"
         description: "Security Group for Kubernetes"
         state: absent
+    - name: delete local kubeadm.yaml file
+      file:
+        path: "{{ kubeadm_token_file }}"
+        state: absent
 
 - hosts: tag_class_kubernetes
   # TODO: try this with gather_facts: yes
