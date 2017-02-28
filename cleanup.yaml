@@ -1,4 +1,17 @@
 ---
+- hosts: tag_class_kubernetes
+  # TODO: try this with gather_facts: yes
+  gather_facts: no
+  tasks:
+    - name: gather ec2 facts
+      local_action: ec2_facts
+    - name: terminate instances
+      local_action: ec2
+        region="{{ region }}"
+        wait=yes
+        instance_ids="{{ hostvars[inventory_hostname]['ec2_id'] }}"
+        state=absent
+
 - hosts: localhost
   connection: local
   gather_facts: no
@@ -26,16 +39,3 @@
       file:
         path: "{{ controller_file }}"
         state: absent
-
-- hosts: tag_class_kubernetes
-  # TODO: try this with gather_facts: yes
-  gather_facts: no
-  tasks:
-    - name: gather ec2 facts
-      local_action: ec2_facts
-    - name: terminate instances
-      local_action: ec2
-        region="{{ region }}"
-        wait=yes
-        instance_ids="{{ hostvars[inventory_hostname]['ec2_id'] }}"
-        state=absent
