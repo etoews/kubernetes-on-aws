@@ -20,7 +20,11 @@
         state: absent
     - name: delete local kubeadm.yaml file
       file:
-        path: "{{ kubeadm_token_file }}"
+        path: "{{ kubeadm_file }}"
+        state: absent
+    - name: delete local controller.yaml file
+      file:
+        path: "{{ controller_file }}"
         state: absent
 
 - hosts: tag_class_kubernetes

@@ -1,17 +1,17 @@
 ---
 - name: check for the kubeadm token file
-  local_action: stat path="{{ kubeadm_token_file }}"
-  register: stat_kubeadm_token_file
+  local_action: stat path="{{ kubeadm_file }}"
+  register: stat_kubeadm_file
 - name: generate kubeadm token
   command: kubeadm token generate
   register: kubeadm_token_generate
-  when: stat_kubeadm_token_file.stat.exists == false
+  when: stat_kubeadm_file.stat.exists == false
 - set_fact:
     kubeadm_token: "{{ kubeadm_token_generate.stdout }}"
 # crazy quoting for colons https://github.com/ansible/ansible/issues/2769
 - name: write kubeadm token to local file
-  local_action: copy content="kubeadm_token{{':'}} {{ kubeadm_token }}" dest="{{ kubeadm_token_file }}"
-  when: stat_kubeadm_token_file.stat.exists == false
+  local_action: copy content="kubeadm_token{{':'}} {{ kubeadm_token }}" dest="{{ kubeadm_file }}"
+  when: stat_kubeadm_file.stat.exists == false
 
 - include: tasks/check-kubelet.yaml
 - name: kubeadm init
