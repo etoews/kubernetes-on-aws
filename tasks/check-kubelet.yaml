@@ -1,0 +1,5 @@
+---
+- name: check for the kubelet config file
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: stat_kubelet_config_file

@@ -1,0 +1,5 @@
+---
+- include: tasks/check-kubelet.yaml
+- name: kubeadm join
+  command: kubeadm join --token "{{ kubeadm_token }}" "{{ controller_private_ip }}"
+  when: stat_kubelet_config_file.stat.exists == false

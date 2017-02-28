@@ -48,6 +48,14 @@
           role: controller
         count_tag:
           role: controller
+      register: controller
+    - set_fact:
+        controller_private_ip: "{{ controller.instances[0].private_ip }}"
+      when: controller is defined
+    # crazy quoting for colons https://github.com/ansible/ansible/issues/2769
+    - name: write controller private ip to local file
+      local_action: copy content="controller_private_ip{{':'}} {{ controller_private_ip }}" dest="{{ controller_private_ip_file }}"
+      when: controller is defined
     - name: create worker instances
       ec2:
         region: "{{ region }}"

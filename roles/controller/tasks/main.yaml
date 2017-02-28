@@ -4,20 +4,19 @@
   register: stat_kubeadm_token_file
 - name: generate kubeadm token
   command: kubeadm token generate
-  register: kubeadm_token
+  register: kubeadm_token_generate
   when: stat_kubeadm_token_file.stat.exists == false
+- set_fact:
+    kubeadm_token: "{{ kubeadm_token_generate.stdout }}"
 # crazy quoting for colons https://github.com/ansible/ansible/issues/2769
 - name: write kubeadm token to local file
-  local_action: copy content="kubeadm_token{{':'}} {{ kubeadm_token.stdout }}" dest="{{ kubeadm_token_file }}"
+  local_action: copy content="kubeadm_token{{':'}} {{ kubeadm_token }}" dest="{{ kubeadm_token_file }}"
   when: stat_kubeadm_token_file.stat.exists == false
 
-- name: check for the kubeadm config file
-  stat:
-    path: /etc/kubernetes/admin.conf
-  register: stat_kubeadm_config_file
+- include: tasks/check-kubelet.yaml
 - name: kubeadm init
   command: kubeadm init --token "{{ kubeadm_token.stdout }}"
-  when: stat_kubeadm_config_file.stat.exists == false
+  when: stat_kubelet_config_file.stat.exists == false
 - name: installing a pod network
   command: kubectl apply -f https://git.io/weave-kube
-  when: stat_kubeadm_config_file.stat.exists == false
+  when: stat_kubelet_config_file.stat.exists == false
