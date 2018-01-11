@@ -28,6 +28,10 @@
             from_port: 22
             to_port: 22
             cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 6443
+            to_port: 6443
+            cidr_ip: 0.0.0.0/0
           - proto: all
             group_name: "{{ resource_name }}"
         rules_egress:
@@ -49,13 +53,19 @@
         count_tag:
           role: controller
       register: controller
+    - name: check for the controller file
+      stat:
+        path: "{{ controller_file }}"
+      register: stat_controller_file
     - set_fact:
         controller_private_ip: "{{ controller.instances[0].private_ip }}"
-      when: controller is defined
+      when: stat_controller_file.stat.exists == false
     # crazy quoting for colons https://github.com/ansible/ansible/issues/2769
     - name: write controller private ip to local file
-      local_action: copy content="controller_private_ip{{':'}} {{ controller_private_ip }}" dest="{{ controller_file }}"
-      when: controller is defined
+      copy:
+        content: "controller_private_ip{{':'}} {{ controller_private_ip }}"
+        dest: "{{ controller_file }}"
+      when: stat_controller_file.stat.exists == false
     - name: create worker instances
       ec2:
         region: "{{ region }}"

@@ -2,3 +2,5 @@
 
 group_vars/all/kubeadm.yaml
 group_vars/all/controller.yaml
+
+kubeconfig/admin.conf
